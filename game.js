@@ -43,6 +43,7 @@ const gameState = {
     
     // Special event tracking
     injuredHiker: null,
+    injuredHikerEncountered: false,
     trash: 0,
     fireActive: false
 };
@@ -366,7 +367,16 @@ function moveForward() {
     if (hasStatus('poisoned')) statusPenalty *= 0.8;
     if (hasStatus('frostbite')) statusPenalty *= 0.8;
     
-    const distancePerHour = (baseSpeed / 24) * speedMultiplier * statusPenalty;
+    // Weather penalties
+    let weatherPenalty = 1;
+    if (gameState.weather.type === 'rainy') weatherPenalty *= 0.9; // -10%
+    if (gameState.weather.type === 'snowy') {
+        // -20% unless has crampons
+        weatherPenalty *= hasItem('crampons') ? 1 : 0.8;
+    }
+    if (gameState.weather.type === 'windy') weatherPenalty *= 0.95; // -5%
+    
+    const distancePerHour = (baseSpeed / 24) * speedMultiplier * statusPenalty * weatherPenalty;
     gameState.distance += distancePerHour;
     
     // Fire goes out when moving
@@ -469,6 +479,10 @@ function drainVitals(hours, resting = false) {
         if (hasItem('poles')) staminaDrain *= 0.925;
         if (hasItem('kneepads')) staminaDrain *= 0.95;
         
+        // Weather penalties
+        if (gameState.weather.type === 'windy') staminaDrain *= 1.15; // +15%
+        if (gameState.weather.type === 'snowy') staminaDrain *= 1.10; // +10%
+        
         // Status penalties
         if (gameState.fullness < 20) staminaDrain *= 1.5;
         if (hasStatus('poisoned')) staminaDrain *= 1.3;
@@ -483,6 +497,11 @@ function drainVitals(hours, resting = false) {
         fullnessDrain *= (1 + (gameState.currentLoad - 25) * 0.02);
     }
     gameState.fullness = Math.max(0, gameState.fullness - fullnessDrain);
+    
+    // Sunny weather sanity bonus while moving
+    if (!resting && gameState.weather.type === 'sunny') {
+        gameState.sanity = Math.min(100, gameState.sanity + 1 * hours);
+    }
     
     // Temperature effects
     updateBodyTemperature(hours);
@@ -568,32 +587,55 @@ function advanceTime(hours) {
 }
 
 function generateWeather() {
-    const types = ['clear', 'cloudy', 'rainy', 'snowy'];
-    const weatherType = types[Math.floor(Math.random() * types.length)];
+    // Store previous day's temp for precipitation logic
+    const previousTemp = gameState.weather.temp;
     
-    let temp = -5 - Math.random() * 15; // -5 to -20
+    // Random weather selection: sunny, cloudy, windy, or precipitation
+    const weatherOptions = ['sunny', 'cloudy', 'windy', 'precipitation'];
+    let selectedWeather = weatherOptions[Math.floor(Math.random() * weatherOptions.length)];
+    
+    // Start with previous temp or initial temp
+    let temp = previousTemp !== undefined ? previousTemp : -5;
+    let weatherType = 'clear';
     let description = 'Clear';
     
-    switch(weatherType) {
+    // Apply temperature changes based on weather type
+    switch(selectedWeather) {
+        case 'sunny':
+            weatherType = 'sunny';
+            description = 'Sunny';
+            temp += 3 + Math.random() * 2; // +3°C to +5°C
+            break;
         case 'cloudy':
+            weatherType = 'cloudy';
             description = 'Cloudy';
-            temp += 2;
+            temp += -1 + Math.random() * 2; // -1°C to +1°C
             break;
-        case 'rainy':
-            description = 'Rainy';
-            temp += 5;
-            // Check for wet status
-            if (!hasItem('jacket') && Math.random() < 0.6) {
-                addStatus('wet');
+        case 'windy':
+            weatherType = 'windy';
+            description = 'Windy';
+            temp += -5 + Math.random() * 2; // -5°C to -3°C
+            break;
+        case 'precipitation':
+            // Determine rain or snow based on previous day's temp
+            if (previousTemp >= 0) {
+                weatherType = 'rainy';
+                description = 'Rainy';
+                temp += -4 + Math.random() * 2; // -4°C to -2°C
+                // Check for wet status
+                if (!hasItem('jacket') && Math.random() < 0.6) {
+                    addStatus('wet');
+                }
+            } else {
+                weatherType = 'snowy';
+                description = 'Snowy';
+                temp += -7 + Math.random() * 3; // -7°C to -4°C
             }
-            break;
-        case 'snowy':
-            description = 'Snowy';
-            temp -= 5;
             break;
     }
     
     gameState.weather = { type: weatherType, temp: Math.round(temp), description };
+    updateLandscapeVisuals();
 }
 
 function updateStatusEffects(hours) {
@@ -607,6 +649,46 @@ function updateStatusEffects(hours) {
         }
         return true;
     });
+}
+
+function updateLandscapeVisuals() {
+    const landscape = document.getElementById('landscape');
+    if (!landscape) return;
+    
+    const weather = gameState.weather.type;
+    
+    // Remove all weather classes
+    landscape.className = 'landscape';
+    
+    // Apply weather-specific styling
+    switch(weather) {
+        case 'sunny':
+            landscape.classList.add('weather-sunny');
+            landscape.style.background = 'linear-gradient(to bottom, #87ceeb 0%, #f0f8ff 40%, #90ee90 100%)';
+            break;
+        case 'cloudy':
+            landscape.classList.add('weather-cloudy');
+            landscape.style.background = 'linear-gradient(to bottom, #778899 0%, #b0c4de 40%, #8fbc8f 100%)';
+            break;
+        case 'windy':
+            landscape.classList.add('weather-windy');
+            landscape.style.background = 'linear-gradient(to bottom, #6b7f99 0%, #9db4c9 40%, #7a9d7a 100%)';
+            break;
+        case 'rainy':
+            landscape.classList.add('weather-rainy');
+            landscape.style.background = 'linear-gradient(to bottom, #4a5f7f 0%, #6b8ba9 40%, #5a7a5a 100%)';
+            // Add rain effect
+            landscape.setAttribute('data-weather', '🌧️');
+            break;
+        case 'snowy':
+            landscape.classList.add('weather-snowy');
+            landscape.style.background = 'linear-gradient(to bottom, #d0d8e0 0%, #e8f0f8 40%, #f0f8ff 100%)';
+            // Add snow effect
+            landscape.setAttribute('data-weather', '❄️');
+            break;
+        default:
+            landscape.style.background = 'linear-gradient(to bottom, #87ceeb 0%, #f0f8ff 50%, #90ee90 100%)';
+    }
 }
 
 // ===========================
@@ -875,8 +957,8 @@ function triggerRandomEvent() {
         events.push('desperateMeasures');
     }
     
-    // Injured hiker (once per game)
-    if (!gameState.injuredHiker && Math.random() < 0.1) {
+    // Injured hiker (once per game) - increased probability
+    if (!gameState.injuredHikerEncountered && Math.random() < 0.25) {
         events.push('injuredHiker');
     }
     
@@ -996,6 +1078,7 @@ function dumpTrash() {
 
 function startInjuredHikerEvent() {
     gameState.injuredHiker = { stage: 1, startTime: gameState.day * 24 + gameState.time };
+    gameState.injuredHikerEncountered = true; // Mark as encountered to prevent re-occurrence
     
     showEvent('🚨 Injured Hiker', 'You encounter a badly injured hiker. They need immediate aid. Can you provide a Compressed Biscuit OR First Aid Kit?', [
         { text: 'Give Compressed Biscuit', action: () => giveHikerBiscuit() },
@@ -1121,6 +1204,9 @@ function updateUI() {
     
     // Quick inventory
     updateQuickInventory();
+    
+    // Update landscape visuals
+    updateLandscapeVisuals();
     
     // Update fire button state
     const fireBtn = document.getElementById('build-fire-btn');
@@ -1360,6 +1446,7 @@ function restartGame() {
         hoursAtZeroStamina: 0,
         extremeTempHours: 0,
         injuredHiker: null,
+        injuredHikerEncountered: false,
         trash: 0,
         fireActive: false
     });

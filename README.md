@@ -35,13 +35,21 @@ Travel 100 kilometers through the mountains while keeping yourself alive. Manage
 - **Wild Fruit**: Risk poisoning for a food boost
 - **Wild Animals**: Chance of injury or sanity boost
 - **Trash Collection**: Environmental stewardship vs. weight burden
-- **Injured Hiker**: Complex multi-stage rescue mission with time pressure
+- **Injured Hiker**: Complex multi-stage rescue mission with time pressure and $50,000 reward (25% encounter rate!)
 - **Desperate Measures**: Moral dilemma when survival is on the line
 
 ### 🌡️ Dynamic Weather System
-- Clear, Cloudy, Rainy, and Snowy conditions
-- Temperature variations affecting gameplay
-- Weather-based status effects (Wet, Frostbite)
+- **5 Weather Types**: Sunny, Cloudy, Windy, Rainy, and Snowy conditions
+- **Temperature-Based Precipitation**: Rain occurs when previous temp ≥ 0°C, Snow when < 0°C
+- **Realistic Temperature Changes**: 
+  - Sunny: +3°C to +5°C (optimal conditions)
+  - Cloudy: -1°C to +1°C (stable)
+  - Windy: -3°C to -5°C (wind chill)
+  - Rainy: -2°C to -4°C (only above freezing)
+  - Snowy: -4°C to -7°C (only below freezing)
+- **Visual Weather Effects**: Dynamic landscape changes with animated weather icons
+- **Weather-based penalties**: Movement speed and stamina affected by conditions
+- **Status effects**: Wet (from rain), visibility reduction (from snow)
 
 ### ⚠️ Status Effects
 - **Wet**: Rapid temperature loss (curable: 5 hours or Waterproof Jacket)
@@ -146,6 +154,8 @@ Hiking/
 ## 🎨 Design Highlights
 
 - **Beautiful Gradient UI**: Mountain-inspired blue color scheme
+- **Dynamic Weather Visuals**: Landscape changes with weather conditions - see the sun, clouds, rain, and snow!
+- **Animated Weather Effects**: Floating rain/snow icons, pulsing sun, shaking wind effects
 - **Real-time Progress Bars**: Color-coded vital statistics
 - **Smooth Animations**: Fade-ins, hover effects, transitions
 - **Responsive Layout**: Three-panel design (vitals | game | inventory)
@@ -154,12 +164,14 @@ Hiking/
 
 ## 🎲 Game Balance
 
-- **Baseline Movement**: 15km per day at 25kg load
+- **Baseline Movement**: 15km per day at 25kg load in sunny/cloudy weather
 - **Load Penalties**: Each kg over 25 = 2% speed reduction
-- **Stamina Drain**: 5 per hour moving (affected by load and gear)
+- **Stamina Drain**: 5 per hour moving (affected by load, gear, and weather)
 - **Fullness Drain**: 3 per hour (affected by load)
-- **Temperature Change**: 0.3°C per hour in cold weather
+- **Weather Temperature Effects**: Daily temperature changes based on weather type
+- **Weather Movement Penalties**: Rainy (-10%), Snowy (-20%), Windy (-5%)
 - **Status Effect Duration**: Most effects last 5 hours
+- **Random Event Rate**: 15% per hour moved, with 25% chance for injured hiker
 
 ## 🏆 Winning Strategies
 

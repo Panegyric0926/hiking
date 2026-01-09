@@ -1,11 +1,12 @@
 # General Settings
 
-- A hiking game featuring a shop system, random events, and survival vitals. The game is accessible via a web browser.
+- A hiking game featuring a shop system, random events, weather dynamics, and survival vitals. The game is accessible via a web browser.
 
 # Vitals
 
 - **Body Temperature**
-    - **Effect:** Continues to drop if clothing is insufficient for the cold weather.
+    - **Base Mechanism:** Determined by the current Day's Weather and the player's clothing insulation.
+    - **Effect:** Continues to drop if clothing is insufficient for the cold weather or if the player is "Wet".
     - **Consequences:** Both hypothermia (low temp) and hyperthermia (high temp) result in Sanity and Stamina loss.
     - **Critical State:** Persisting abnormal temperatures lead to death.
         - Extreme low temperature: Death in 4 hours.
@@ -16,14 +17,14 @@
 - **Stamina (0-100)**
     - **Low Stamina (< 20):** Movement speed decreases.
     - **Zero Stamina:** Player becomes immobile. Death occurs after 4 hours at zero stamina.
-    - **Drain:** Decreases while moving. Heavier loads cause rapid depletion. Drain rate increases with severe hunger, bad weather, or high altitude.
+    - **Drain:** Decreases while moving. Heavier loads cause rapid depletion. Drain rate increases during **Windy** or **Snowy** weather, severe hunger, or high altitude.
     - **Recovery:** Rest (small amount) or Sleep (large amount).
     - **Penalty:** Stamina drops significantly if the player does not sleep for more than 1 day.
 
 - **Sanity (0-100)**
     - **Low Sanity (< 20):** Movement speed decreases; chance of injury increases.
     - **Zero Sanity:** Instant death.
-    - **Drain:** Decreases upon encountering a corpse, prolonged hunger, or sleep deprivation (> 1 day).
+    - **Drain:** Decreases upon encountering a corpse, prolonged hunger, sleep deprivation (> 1 day), or enduring **Stormy Weather** without shelter.
     - **Recovery:** Encountering a living human (high amount), eating specific foods, or sleeping (medium amount).
 
 - **Fullness (0-100)**
@@ -35,6 +36,42 @@
 - **Load**
     - **Capacity:** Maximum load is determined by the backpack purchased.
     - **Penalty:** Heavier loads result in slower movement speed and faster depletion of Stamina and Fullness.
+
+# Weather System
+
+- **Cycle:** Weather updates at the start of every new day.
+- **Selection Logic:** The game randomly selects a weather type for the new day.
+- **Precipitation Rule:** If the random selection results in precipitation, the type is determined by the **Previous Day's Average Temperature**:
+    - If Previous Temp **≥ 0°C**: Weather becomes **Rainy**.
+    - If Previous Temp **< 0°C**: Weather becomes **Snowy**.
+
+## Weather Types & Effects
+
+- **Sunny**
+    - **Temperature Influence:** +3°C to +5°C (relative to previous day).
+    - **Effect:** Optimal visibility. No movement penalties.
+    - **Sanity:** Small passive regeneration while walking.
+
+- **Cloudy**
+    - **Temperature Influence:** -1°C to +1°C (Stable).
+    - **Effect:** No specific buffs or debuffs.
+
+- **Windy**
+    - **Temperature Influence:** -3°C to -5°C (Wind Chill factor).
+    - **Effect:** Walking against the wind is exhausting. **Stamina drain increased by 15%.**
+
+- **Rainy** (Only occurs if Previous Temp ≥ 0°C)
+    - **Temperature Influence:** -2°C to -4°C.
+    - **Effect:**
+        - **Wet State:** Applied immediately if player does not have a Waterproof Jacket.
+        - **Muddy Terrain:** Movement speed reduced by 10%.
+
+- **Snowy** (Only occurs if Previous Temp < 0°C)
+    - **Temperature Influence:** -4°C to -7°C.
+    - **Effect:**
+        - **Deep Snow:** Movement speed reduced by 20%.
+        - **Stamina Drain:** Increased by 10% (trudging through snow).
+        - **Visibility:** High chance to miss "Find Wild Fruit" or "Find Trash" events due to snow cover.
 
 # Shop
 
@@ -49,9 +86,9 @@
 ## Outdoor Gear
 - **Trekking Poles:** 0.48kg, 900 | Stamina drain reduced by 7.5%
 - **Knee Pads:** 0.25kg, 480 | Stamina drain reduced by 5%
-- **Tent:** 2.8kg, 5,800 | Required for sleeping outdoors
-- **Waterproof Jacket:** 0.3kg, 200 | Waterproof and windproof
-- **Goggles:** 0.12kg, 600 | Prevents snow blindness
+- **Tent:** 2.8kg, 5,800 | Required for sleeping outdoors; protects against Rain/Snow effects while sleeping.
+- **Waterproof Jacket:** 0.3kg, 200 | Prevents "Wet" state during Rain.
+- **Goggles:** 0.12kg, 600 | Prevents snow blindness (Sanity loss) during Sunny+Snowy conditions.
 - **Gloves:** 0.25kg, 800
 - **Windproof Mask:** 0.1kg, 420
 - **-10° Sleeping Bag:** 0.95kg, 1,800 | Min temp: -10°
@@ -59,7 +96,7 @@
 - **-30° Sleeping Bag:** 1.7kg, 4,800 | Min temp: -30°
 - **-40° Sleeping Bag:** 2.2kg, 6,800 | Min temp: -40°
 - **Headlamp:** 0.15kg, 650
-- **Crampons:** 0.8kg, 600
+- **Crampons:** 0.8kg, 600 | Negates movement speed penalty in **Snowy** weather.
 - **Climbing Ropes:** 1.5kg, 800
 - **Thermal Blanket:** 0.18kg, 80 | Single-use item
 
@@ -75,7 +112,7 @@
 - **Tired:** (Stamina < 20) Decreased movement speed.
 - **Delirious:** (Sanity < 20) Decreased movement speed, increased injury chance.
 - **Hungry:** (Fullness < 20) Decreased movement speed.
-- **Wet:** Occurs on rainy days without a Waterproof Jacket. Causes rapid body temperature loss. Auto-expires in 5 hours.
+- **Wet:** Occurs during **Rainy** weather without a Waterproof Jacket. Causes rapid body temperature loss. Auto-expires in 5 hours *after* rain stops or clothes are changed.
 - **Poisoned:** Chance to occur when eating wild fruit. Causes sudden 15-point Stamina loss, accelerates Stamina drain, and decreases movement speed for 5 hours. Cured via First Aid Kit.
 - **Frostbite:** Occurs if sleeping when ambient temp is lower than Sleeping Bag rating, if body temp is critical, or if moving in sub-zero temps without Gloves/Mask. Causes sudden 15-point Stamina loss, accelerates Stamina drain, and decreases movement speed. **Does not expire automatically**; requires First Aid Kit + normal body temperature to cure.
 
@@ -125,4 +162,8 @@
 
 # Speed Mechanics
 
-- **Baseline:** The player can walk 15km per day with a 25kg load.
+- **Baseline:** The player can walk 15km per day with a 25kg load in **Sunny/Cloudy** weather.
+- **Weather Modifiers (Cumulative):**
+    - **Rainy:** -10% Distance per day (Mud).
+    - **Snowy:** -20% Distance per day (Deep Snow). *Negated by Crampons.*
+    - **Windy:** -5% Distance per day (Resistance).

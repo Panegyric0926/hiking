@@ -461,6 +461,65 @@ body {
     background-size: cover;
 }
 
+/* Weather-specific landscape effects */
+.landscape.weather-rainy::after,
+.landscape.weather-snowy::after {
+    content: attr(data-weather);
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 4em;
+    opacity: 0.7;
+    animation: weatherFloat 3s ease-in-out infinite;
+}
+
+@keyframes weatherFloat {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(20px); }
+}
+
+.landscape.weather-windy {
+    animation: windShake 0.5s ease-in-out infinite;
+}
+
+@keyframes windShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+.landscape.weather-sunny::after {
+    content: '☀️';
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    font-size: 3em;
+    animation: sunPulse 2s ease-in-out infinite;
+}
+
+@keyframes sunPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.9; }
+}
+
+.landscape.weather-cloudy::after {
+    content: '☁️';
+    position: absolute;
+    top: 30px;
+    left: 30%;
+    font-size: 3em;
+    opacity: 0.8;
+}
+
+.landscape.weather-snowy {
+    filter: brightness(1.2);
+}
+
+.landscape.weather-rainy {
+    filter: brightness(0.7);
+}
+
 .game-controls {
     display: flex;
     justify-content: center;
