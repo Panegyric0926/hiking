@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mountain Survival - Hiking Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="game-header">
+            <h1>⛰️ Mountain Survival</h1>
+            <p class="subtitle">A Journey Through the Wilderness</p>
+        </header>
+
+        <!-- Main Game Area -->
+        <div class="game-layout">
+            <!-- Left Panel - Vitals & Status -->
+            <aside class="left-panel">
+                <div class="panel vitals-panel">
+                    <h2>🩺 Vitals</h2>
+                    <div class="vital-item">
+                        <div class="vital-header">
+                            <span>🌡️ Body Temperature</span>
+                            <span id="temp-value" class="vital-value">36.5°C</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="temp-bar" class="progress-fill temp-bar"></div>
+                        </div>
+                    </div>
+                    <div class="vital-item">
+                        <div class="vital-header">
+                            <span>💪 Stamina</span>
+                            <span id="stamina-value" class="vital-value">100/100</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="stamina-bar" class="progress-fill stamina-bar"></div>
+                        </div>
+                    </div>
+                    <div class="vital-item">
+                        <div class="vital-header">
+                            <span>🧠 Sanity</span>
+                            <span id="sanity-value" class="vital-value">100/100</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="sanity-bar" class="progress-fill sanity-bar"></div>
+                        </div>
+                    </div>
+                    <div class="vital-item">
+                        <div class="vital-header">
+                            <span>🍖 Fullness</span>
+                            <span id="fullness-value" class="vital-value">100/100</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="fullness-bar" class="progress-fill fullness-bar"></div>
+                        </div>
+                    </div>
+                    <div class="vital-item">
+                        <div class="vital-header">
+                            <span>🎒 Load</span>
+                            <span id="load-value" class="vital-value">0/0 kg</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="load-bar" class="progress-fill load-bar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel status-panel">
+                    <h2>⚠️ Status Effects</h2>
+                    <div id="status-effects" class="status-effects-list">
+                        <p class="no-status">No active effects</p>
+                    </div>
+                </div>
+
+                <div class="panel info-panel">
+                    <h2>📊 Stats</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">💰 Money:</span>
+                            <span id="money-value" class="info-value">20,000</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">📍 Distance:</span>
+                            <span id="distance-value" class="info-value">0/100 km</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">⏱️ Time:</span>
+                            <span id="time-value" class="info-value">Day 1, 06:00</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">🌡️ Weather:</span>
+                            <span id="weather-value" class="info-value">Clear, -5°C</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center Panel - Main Game View -->
+            <main class="center-panel">
+                <!-- Start Screen -->
+                <div id="start-screen" class="screen active">
+                    <div class="start-content">
+                        <h2>Welcome to Mountain Survival</h2>
+                        <p>You are about to embark on a perilous journey through the mountains. Manage your vitals, purchase supplies, and survive the harsh wilderness.</p>
+                        <p class="warning">⚠️ Death is permanent. Choose wisely.</p>
+                        <button id="start-game-btn" class="btn btn-primary btn-large">Start Expedition</button>
+                    </div>
+                </div>
+
+                <!-- Shop Screen -->
+                <div id="shop-screen" class="screen">
+                    <h2>🏪 Mountain Shop</h2>
+                    <p class="shop-money">Available Money: <span id="shop-money">20,000</span></p>
+                    <p class="shop-weight">Weight: <span id="shop-weight-current">0</span> / <span id="shop-weight-max">0</span> kg <span id="shop-weight-warning" class="text-warning" style="display: none;">(⚠️ Purchase a backpack first!)</span></p>
+                    
+                    <div class="shop-section">
+                        <h3>🎒 Backpacks</h3>
+                        <div id="backpacks-list" class="shop-grid"></div>
+                    </div>
+                    
+                    <div class="shop-section">
+                        <h3>⛺ Outdoor Gear</h3>
+                        <div id="gear-list" class="shop-grid"></div>
+                    </div>
+                    
+                    <div class="shop-section">
+                        <h3>📦 Supplies</h3>
+                        <div id="supplies-list" class="shop-grid"></div>
+                    </div>
+
+                    <button id="finish-shopping-btn" class="btn btn-primary btn-large">Finish Shopping & Begin Journey</button>
+                </div>
+
+                <!-- Game Screen -->
+                <div id="game-screen" class="screen">
+                    <div class="game-view">
+                        <div id="landscape" class="landscape"></div>
+                        <div class="game-controls">
+                            <button id="move-btn" class="btn btn-action">🚶 Move Forward</button>
+                            <button id="rest-btn" class="btn btn-action">😴 Rest (1 hour)</button>
+                            <button id="sleep-btn" class="btn btn-action">🛌 Sleep (8 hours)</button>
+                            <button id="quick-eat-btn" class="btn btn-action">🍽️ Quick Eat</button>
+                            <button id="build-fire-btn" class="btn btn-action">🔥 Build Fire</button>
+                            <button id="inventory-btn" class="btn btn-secondary">🎒 Inventory</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Modal -->
+                <div id="event-modal" class="modal">
+                    <div class="modal-content">
+                        <h3 id="event-title">Random Event</h3>
+                        <p id="event-description"></p>
+                        <div id="event-choices" class="event-choices"></div>
+                    </div>
+                </div>
+
+                <!-- Inventory Modal -->
+                <div id="inventory-modal" class="modal">
+                    <div class="modal-content modal-large">
+                        <div class="modal-header">
+                            <h3>🎒 Inventory</h3>
+                            <button class="close-btn" id="close-inventory">&times;</button>
+                        </div>
+                        <div id="inventory-content" class="inventory-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Game Over Screen -->
+                <div id="gameover-screen" class="screen">
+                    <div class="gameover-content">
+                        <h2 id="gameover-title">☠️ Game Over</h2>
+                        <p id="gameover-message"></p>
+                        <div id="gameover-stats"></div>
+                        <button id="restart-btn" class="btn btn-primary btn-large">Try Again</button>
+                    </div>
+                </div>
+
+                <!-- Victory Screen -->
+                <div id="victory-screen" class="screen">
+                    <div class="victory-content">
+                        <h2>🎉 Victory!</h2>
+                        <p>Congratulations! You've successfully completed your journey through the mountains!</p>
+                        <div id="victory-stats"></div>
+                        <button id="victory-restart-btn" class="btn btn-primary btn-large">Play Again</button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Panel - Inventory & Log -->
+            <aside class="right-panel">
+                <div class="panel inventory-panel">
+                    <h2>🎒 Quick Inventory</h2>
+                    <div id="quick-inventory" class="quick-inventory-list"></div>
+                </div>
+
+                <div class="panel log-panel">
+                    <h2>📜 Activity Log</h2>
+                    <div id="activity-log" class="activity-log"></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
